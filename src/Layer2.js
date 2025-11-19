@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import mapImage from "./assets/finalmap.png";
+import mapImage from "./assets/mm.png";
 
 // Province logos
 import sindh from "./assets/sindh.png";
@@ -32,14 +32,21 @@ import pk4 from "./assets/pk4.png";
 
 // DYK assets
 import didu from "./assets/didu.png";
-import sindhdyk from "./assets/sindhdyk.png";
-import baldyk from "./assets/baldyk.png";
-import pundyk from "./assets/pundyk.png";
-import kpkdyk from "./assets/kpkdyk.png";
+import sindhdyk from "./assets/newsin.png";
+import baldyk from "./assets/newbal.png";
+import pundyk from "./assets/newpun.png";
+import kpkdyk from "./assets/newkpk.png";
+
+// Sounds
+import popupSound from "./assets/popup33.mp3";
+import starSoundFile from "./assets/starSound.mp3";
+import balSong from "./assets/balsong.mov";
+import punSong from "./assets/punsong.mov";
+import kpkSong from "./assets/kpksong.mov";
 
 import "./App.css";
 
-// 🎉 Confetti Animation
+// Confetti Component
 const Confetti = () => {
   const pieces = Array.from({ length: 80 });
   return (
@@ -73,6 +80,7 @@ const Confetti = () => {
 
 function Layer2() {
   const navigate = useNavigate();
+
   const [activeButton, setActiveButton] = useState(null);
   const [visited, setVisited] = useState([]);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -80,7 +88,6 @@ function Layer2() {
   const [isExploring, setIsExploring] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
-  const [voices, setVoices] = useState([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [phase, setPhase] = useState("regions");
   const [currentRegion, setCurrentRegion] = useState("sindh");
@@ -92,82 +99,108 @@ function Layer2() {
 
   const mapRef = useRef(null);
 
-  // 🧭 City Buttons
-  const [buttons, setButtons] = useState([
-    // Sindh
-    { id: 1, x: 0.45, y: 0.7, logo: sindh, logoGray: sindhG, popup: sindh1, text: "Karachi", region: "sindh", locked: false },
-    { id: 2, x: 0.47, y: 0.8, logo: sindh, logoGray: sindhG, popup: sindh2, text: "Hyderabad", region: "sindh", locked: false },
-    { id: 3, x: 0.49, y: 0.86, logo: sindh, logoGray: sindhG, popup: sindh3, text: "Sukkur", region: "sindh", locked: false },
-    { id: 4, x: 0.52, y: 0.95, logo: sindh, logoGray: sindhG, popup: sindh4, text: "Larkana", region: "sindh", locked: false },
+  // Audio Refs
+  const popupCardAudioRef = useRef(new Audio(popupSound));
+  const dykPopupAudioRef = useRef(new Audio(starSoundFile));
+  const balAudioRef = useRef(new Audio(balSong));
+  const punAudioRef = useRef(new Audio(punSong));
+  const kpkAudioRef = useRef(new Audio(kpkSong));
 
-    // Balochistan
-    { id: 6, x: 0.28, y: 0.75, logo: bal, logoGray: balG, popup: bal1, text: "Quetta", region: "balochistan", locked: true },
+  // Province buttons
+  const [buttons, setButtons] = useState([
+    { id: 1, x: 0.45, y: 0.7, logo: sindh, logoGray: sindhG, popup: sindh1, text: "Karachi", region: "sindh", locked: false },
+    { id: 2, x: 0.40, y: 0.8, logo: sindh, logoGray: sindhG, popup: sindh2, text: "Hyderabad", region: "sindh", locked: false },
+    { id: 3, x: 0.49, y: 0.86, logo: sindh, logoGray: sindhG, popup: sindh3, text: "Sukkur", region: "sindh", locked: false },
+    { id: 4, x: 0.42, y: 0.95, logo: sindh, logoGray: sindhG, popup: sindh4, text: "Larkana", region: "sindh", locked: false },
+    { id: 6, x: 0.28, y: 0.80, logo: bal, logoGray: balG, popup: bal1, text: "Quetta", region: "balochistan", locked: true },
     { id: 7, x: 0.26, y: 0.62, logo: bal, logoGray: balG, popup: bal2, text: "Gwadar", region: "balochistan", locked: true },
     { id: 8, x: 0.34, y: 0.7, logo: bal, logoGray: balG, popup: bal3, text: "Turbat", region: "balochistan", locked: true },
-    { id: 9, x: 0.36, y: 0.61, logo: bal, logoGray: balG, popup: bal4, text: "Khuzdar", region: "balochistan", locked: true },
-
-    // Punjab
-    { id: 13, x: 0.53, y: 0.65, logo: punjab, logoGray: punjabG, popup: pun1, text: "Lahore", region: "punjab", locked: true },
-    { id: 14, x: 0.59, y: 0.55, logo: punjab, logoGray: punjabG, popup: pun2, text: "Faisalabad", region: "punjab", locked: true },
-    { id: 15, x: 0.55, y: 0.47, logo: punjab, logoGray: punjabG, popup: pun3, text: "Rawalpindi", region: "punjab", locked: true },
-    { id: 16, x: 0.52, y: 0.57, logo: punjab, logoGray: punjabG, popup: pun4, text: "Multan", region: "punjab", locked: true },
-
-    // KPK
-    { id: 19, x: 0.58, y: 0.17, logo: kpk, logoGray: kpkG, popup: pk1, text: "Peshawar", region: "kpk", locked: true },
-    { id: 20, x: 0.62, y: 0.11, logo: kpk, logoGray: kpkG, popup: pk2, text: "Mardan", region: "kpk", locked: true },
+    { id: 9, x: 0.36, y: 0.58, logo: bal, logoGray: balG, popup: bal4, text: "Khuzdar", region: "balochistan", locked: true },
+    { id: 13, x: 0.53, y: 0.68, logo: punjab, logoGray: punjabG, popup: pun1, text: "Lahore", region: "punjab", locked: true },
+    { id: 14, x: 0.61, y: 0.48, logo: punjab, logoGray: punjabG, popup: pun2, text: "Faisalabad", region: "punjab", locked: true },
+    { id: 15, x: 0.55, y: 0.40, logo: punjab, logoGray: punjabG, popup: pun3, text: "Rawalpindi", region: "punjab", locked: true },
+    { id: 16, x: 0.52, y: 0.53, logo: punjab, logoGray: punjabG, popup: pun4, text: "Multan", region: "punjab", locked: true },
+    { id: 19, x: 0.56, y: 0.17, logo: kpk, logoGray: kpkG, popup: pk1, text: "Peshawar", region: "kpk", locked: true },
+    { id: 20, x: 0.57, y: 0.07, logo: kpk, logoGray: kpkG, popup: pk2, text: "Mardan", region: "kpk", locked: true },
     { id: 21, x: 0.63, y: 0.18, logo: kpk, logoGray: kpkG, popup: pk3, text: "Abbottabad", region: "kpk", locked: true },
-    { id: 22, x: 0.58, y: 0.25, logo: kpk, logoGray: kpkG, popup: pk4, text: "Swat", region: "kpk", locked: true },
+    { id: 22, x: 0.54, y: 0.28, logo: kpk, logoGray: kpkG, popup: pk4, text: "Swat", region: "kpk", locked: true },
   ]);
 
-  // 🔈 Voice Playback
-  const speak = (message) => {
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(message);
-      const femaleVoice =
-        voices.find((v) =>
-          /female|zira|Google UK English Female|Google US English/.test(v.name)
-        ) || voices.find((v) => v.lang.startsWith("en"));
-      if (femaleVoice) utterance.voice = femaleVoice;
-      utterance.rate = 0.95;
-      utterance.pitch = 1.3;
-      utterance.volume = 1;
-      window.speechSynthesis.speak(utterance);
+  // Play region song safely
+  // Play region song safely
+// Play region song safely
+const playRegionSong = (region) => {
+  // Stop all audios first
+  [balAudioRef.current, punAudioRef.current, kpkAudioRef.current].forEach(a => {
+    if (a) {
+      a.pause();
+      a.currentTime = 0;
     }
-  };
+  });
 
-  // 🎯 Button Click
-  const handleClick = (id) => {
-    const selected = buttons.find((b) => b.id === id);
-    if (selected.locked) {
-      speak("You need to unlock this region first!");
-      return;
-    }
-    speak(selected.text);
-    setActiveButton(id);
+  let audio = null;
+  if (region === "sindh") audio = balAudioRef.current;
+  if (region === "balochistan") audio = punAudioRef.current;
+  if (region === "punjab") audio = kpkAudioRef.current;
 
-    if (!visited.includes(id)) {
-      const newVisited = [...visited, id];
-      setVisited(newVisited);
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play().catch(err => console.log("Audio play error:", err));
 
-      const regionBtns = buttons.filter((b) => b.region === selected.region);
-      if (regionBtns.every((b) => newVisited.includes(b.id))) {
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 4000);
-        setTimeout(() => {
-          setPhase("didu");
-          setCurrentRegion(selected.region);
-        }, 2500);
+    // Stop after 5s to match confetti duration
+    setTimeout(() => {
+      audio.pause();
+      audio.currentTime = 0;
+    }, 5000);
+  }
+};
+
+// Province button click
+const handleClick = (id) => {
+  const selected = buttons.find(b => b.id === id);
+  if (selected.locked) return;
+
+  setActiveButton(id);
+  popupCardAudioRef.current.currentTime = 0;
+  popupCardAudioRef.current.play();
+
+  if (!visited.includes(id)) {
+    const newVisited = [...visited, id];
+    setVisited(newVisited);
+
+    const regionBtns = buttons.filter(b => b.region === selected.region);
+
+    // ✅ All buttons of this region visited
+    if (regionBtns.every(b => newVisited.includes(b.id))) {
+      // Play the **current region's song immediately**
+      playRegionSong(selected.region);
+
+      // Show confetti immediately
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
+
+      // Set current region for Did You Know popup
+      setCurrentRegion(selected.region);
+
+      // Show Did You Know popup slightly after confetti starts
+      setTimeout(() => setPhase("didu"), 2500);
+
+      // Unlock next region after Did You Know closes
+      const order = ["sindh", "balochistan", "punjab", "kpk"];
+      const next = order[order.indexOf(selected.region) + 1];
+      if (next) {
+        setButtons(prev => prev.map(b => b.region === next ? { ...b, locked: false } : b));
       }
     }
-  };
+  }
+};
 
-  const handleClose = () => {
-    window.speechSynthesis.cancel();
-    setActiveButton(null);
-  };
 
-  // 🖐️ Map Drag
+
+
+  const handleClose = () => setActiveButton(null);
+
+  // Map Drag
   const startDrag = (x, y) => {
     setIsDragging(true);
     setLastPos({ x, y });
@@ -178,45 +211,43 @@ function Layer2() {
     const dx = x - lastPos.x;
     const dy = y - lastPos.y;
     setLastPos({ x, y });
-    setPosition((p) => ({ x: p.x + dx, y: p.y + dy }));
+    setPosition(p => ({ x: p.x + dx, y: p.y + dy }));
   };
   const endDrag = () => {
     setIsDragging(false);
     if (mapRef.current) mapRef.current.style.cursor = "grab";
   };
 
-  const handleMouseDown = (e) => startDrag(e.clientX, e.clientY);
-  const handleMouseMove = (e) => moveDrag(e.clientX, e.clientY);
+  const handleMouseDown = e => startDrag(e.clientX, e.clientY);
+  const handleMouseMove = e => moveDrag(e.clientX, e.clientY);
   const handleMouseUp = () => endDrag();
-  const handleTouchStart = (e) => startDrag(e.touches[0].clientX, e.touches[0].clientY);
-  const handleTouchMove = (e) => moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+  const handleTouchStart = e => startDrag(e.touches[0].clientX, e.touches[0].clientY);
+  const handleTouchMove = e => moveDrag(e.touches[0].clientX, e.touches[0].clientY);
   const handleTouchEnd = () => endDrag();
 
-  // 🚀 Instant Zoom Start (Like Layer1)
-  const handleStartExploring = () => {
-    setIsExploring(true);
-    const screenFactor = Math.min(windowSize.width, windowSize.height);
-    let baseZoom = screenFactor > 1200 ? 4.5 : screenFactor > 600 ? 9.0 : 4.5;
-    if (screenFactor <= 600) baseZoom = 7.0;
-    setScale(baseZoom);
-
-    const mapW = mapRef.current?.clientWidth || 1000;
-    const mapH = mapRef.current?.clientHeight || 600;
-    const targetX = 0.5;
-    const targetY = screenFactor <= 600 ? 0.55 : 0.8;
-    setPosition({ x: -mapW * (targetX - 0.5) * baseZoom, y: -mapH * (targetY - 0.5) * baseZoom });
-
-    speak("Ready for another exploration?");
-  };
-
-  // 🕒 Auto Start
+  // Initial zoom
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-    const timer = setTimeout(() => handleStartExploring(), 800);
-    return () => {
-      clearTimeout(timer);
-      document.body.style.overflow = "auto";
-    };
+    const timer = setTimeout(() => {
+      setIsExploring(true);
+      const screenFactor = Math.min(windowSize.width, windowSize.height);
+      let baseZoom = screenFactor > 1200 ? 4 : screenFactor > 600 ? 8 : 4;
+      if (screenFactor <= 600) baseZoom = 6.5;
+      setScale(baseZoom);
+
+      const mapW = mapRef.current?.clientWidth || 1000;
+      const mapH = mapRef.current?.clientHeight || 600;
+      const targetX = 0.48;
+      const targetY = screenFactor <= 600 ? 0.8 : 0.85;
+      setPosition({ x: -mapW * (targetX - 0.5) * baseZoom, y: -mapH * (targetY - 0.5) * baseZoom });
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [windowSize]);
+
+  // Window resize listener
+  useEffect(() => {
+    const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const logoSize = windowSize.width < 600 ? "28vmin" : "18vmin";
@@ -233,12 +264,12 @@ function Layer2() {
       <div className="fixed inset-0 bg-[#643118]" />
       {showConfetti && <Confetti />}
 
-      {/* 🗺️ Map */}
+      {/* Map */}
       <div
         ref={mapRef}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
-        className="transition-transform duration-[1000ms] ease-in-out relative"
+        className="transition-transform duration-[1000ms] ease-in-out relative flex items-center justify-center"
         style={{
           cursor: "grab",
           transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
@@ -249,16 +280,11 @@ function Layer2() {
       >
         <div className="relative" style={{ width: "min(100vw,177.78vh)", height: "min(56.25vw,100vh)" }}>
           <img src={mapImage} alt="Pakistan Map" className="select-none object-contain w-full h-full" draggable={false} />
-
-          {/* Province Buttons */}
           {isExploring &&
-            buttons.map((btn) => {
+            buttons.map(btn => {
               const isActive = activeButton === btn.id;
               const isVisited = visited.includes(btn.id);
-              const isGlowing = !isActive && !isVisited;
-              const glowScale = 1.3;
-              const finalSize = isGlowing ? `calc(${logoSize} * ${glowScale})` : logoSize;
-
+              const btnWidth = isVisited ? (windowSize.width < 600 ? "24vmin" : "14vmin") : logoSize;
               return (
                 <div
                   key={btn.id}
@@ -271,27 +297,12 @@ function Layer2() {
                 >
                   {isActive ? (
                     <div className="relative transition-all duration-300 inline-block">
-                      <img src={btn.popup} alt="popup" className="block max-w-[140vmin] max-h-[140vmin]" draggable={false} />
-                      <button
-                        onClick={handleClose}
-                        className="absolute -top-3 -right-3 bg-red-600 text-white w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-700"
-                      >
-                        ✕
-                      </button>
+                      <img src={btn.popup} alt="popup" className="block max-w-[70vmin] max-h-[70vmin] w-auto h-auto" draggable={false} />
+                      <button onClick={handleClose} className="absolute -top-3 -right-3 bg-red-600 text-white w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-700 transition">✕</button>
                     </div>
                   ) : (
-                    <div
-                      onClick={() => !btn.locked && handleClick(btn.id)}
-                      className={`cursor-pointer transition-transform duration-300 ${
-                        btn.locked ? "opacity-50 grayscale cursor-not-allowed" : "hover:scale-110"
-                      }`}
-                    >
-                      <img
-                        src={isVisited ? btn.logo : btn.logoGray}
-                        alt={btn.text}
-                        style={{ width: finalSize, height: finalSize }}
-                        className="rounded-full object-contain shadow-xl"
-                      />
+                    <div onClick={() => !btn.locked && handleClick(btn.id)} className={`cursor-pointer transition-transform duration-300 ${btn.locked ? "opacity-50 grayscale cursor-not-allowed" : "hover:scale-110"}`}>
+                      <img src={isVisited ? btn.logo : btn.logoGray} alt={btn.text} style={{ width: btnWidth, height: btnWidth }} className="rounded-full object-contain shadow-xl" />
                     </div>
                   )}
                 </div>
@@ -310,6 +321,8 @@ function Layer2() {
               const dykMap = { sindh: sindhdyk, balochistan: baldyk, punjab: pundyk, kpk: kpkdyk };
               setDykImage(dykMap[currentRegion]);
               setPhase("dyk");
+              dykPopupAudioRef.current.currentTime = 0;
+              dykPopupAudioRef.current.play();
             }}
             className="w-[32vmin] translate-y-[4vmin] translate-x-[2vmin] cursor-pointer hover:scale-110 transition-transform"
             draggable={false}
@@ -327,12 +340,10 @@ function Layer2() {
                 const order = ["sindh", "balochistan", "punjab", "kpk"];
                 const next = order[order.indexOf(currentRegion) + 1];
                 if (next) {
-                  setButtons((prev) => prev.map((b) => (b.region === next ? { ...b, locked: false } : b)));
+                  setButtons(prev => prev.map(b => b.region === next ? { ...b, locked: false } : b));
                   setPhase("regions");
                   setDykImage(null);
-                  speak(`${next} unlocked!`);
                 } else {
-                  speak("You have explored all regions!");
                   setShowConfetti(true);
                   setTimeout(() => {
                     setShowConfetti(false);

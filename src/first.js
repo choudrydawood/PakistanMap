@@ -8,17 +8,23 @@ const First = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
-      {/* Fullscreen image */}
+      
+      {/* FINAL FIX: Using 'object-fill'. 
+          This stretches the image to cover 100% of the screen width and 100% 
+          of the screen height, eliminating all black bars and empty space, 
+          but resulting in image distortion.
+      */}
       <img
         src={mainImage}
-        alt="Main"
-        className="absolute inset-0 w-full h-full object-cover"
+        alt="Main Map"
+        className="absolute inset-0 w-full h-full object-fill"
       />
 
-      {/* Start button - moved further left and slightly higher */}
+      {/* Start button - Keeping the responsive percentage position */}
       <button
         onClick={() => navigate("/second")}
-        className="absolute bottom-28 right-96 transition-transform hover:scale-110 active:scale-95"
+        // Position: bottom-[10%] right-[22%]
+        className="absolute bottom-[10%] right-[24%] transition-transform hover:scale-110 active:scale-95"
       >
         <img
           src={startButton}
