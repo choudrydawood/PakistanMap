@@ -8,39 +8,45 @@ export const BackgroundAudioProvider = ({ children }) => {
   const audioRef = useRef(new Audio(bgSound));
   const location = useLocation();
 
-  // Screens where background sound should NOT play
   const excludedRoutes = ["/layer1", "/layer2"];
 
+  // INITIALIZE (with user unlock)
   useEffect(() => {
     const audio = audioRef.current;
     audio.loop = true;
     audio.volume = 0.6;
+    audio.playbackRate = 0.85;
 
-    const playAudio = () => {
-      audio.play().catch(() => {});
-      window.removeEventListener("click", playAudio);
+    const unlock = () => {
+      if (!excludedRoutes.includes(location.pathname)) {
+        audio.play().catch(() => {});
+      }
+      window.removeEventListener("click", unlock);
+      window.removeEventListener("touchstart", unlock);
     };
 
-    window.addEventListener("click", playAudio);
+    window.addEventListener("click", unlock);
+    window.addEventListener("touchstart", unlock);
 
     return () => {
-      window.removeEventListener("click", playAudio);
+      window.removeEventListener("click", unlock);
+      window.removeEventListener("touchstart", unlock);
     };
-  }, []);
+  }, [location.pathname]);
 
-  // 🔥 Control playback based on current route
+  // FIXED ROUTE-BASED CONTROL
   useEffect(() => {
     const audio = audioRef.current;
     const isExcluded = excludedRoutes.includes(location.pathname);
 
     if (isExcluded) {
-      audio.pause();
-    } else {
-      audio.play().catch(() => {});
+      audio.pause();     // <-- 🔥 KEY FIX: stop global bg audio in Layer1 & Layer2
+      return;
     }
+
+    audio.play().catch(() => {});
   }, [location.pathname]);
 
-  // Used to pause background audio temporarily when other sounds play
   const pauseForForeground = (foregroundAudio) => {
     const bg = audioRef.current;
     bg.pause();

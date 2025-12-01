@@ -83,3 +83,24 @@
 .animate-popStar {
   animation: popStar 1s ease-out forwards;
 }
+@keyframes iconHop {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+.hop-animation {
+  animation: iconHop 1.2s ease-in-out infinite;
+}
+/* Disable ALL image dragging everywhere */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden !important;
+  height: 100%;
+}
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+

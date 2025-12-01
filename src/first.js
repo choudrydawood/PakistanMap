@@ -7,29 +7,40 @@ const First = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
-      
-      {/* FINAL FIX: Using 'object-fill'. 
-          This stretches the image to cover 100% of the screen width and 100% 
-          of the screen height, eliminating all black bars and empty space, 
-          but resulting in image distortion.
-      */}
+    <div
+      className="
+        fixed inset-0 w-screen h-screen
+        overflow-hidden
+        select-none
+        touch-action-none
+      "
+      style={{ overscrollBehavior: "none" }}
+      onTouchMove={(e) => e.preventDefault()}
+      onScroll={(e) => e.preventDefault()}
+    >
+      {/* Fullscreen image - drag disabled */}
       <img
         src={mainImage}
-        alt="Main Map"
-        className="absolute inset-0 w-full h-full object-fill"
+        alt="Main"
+        draggable="false"
+        className="
+          absolute inset-0 w-full h-full
+          object-fill
+          pointer-events-none
+          select-none
+        "
       />
 
-      {/* Start button - Keeping the responsive percentage position */}
+      {/* Start button */}
       <button
         onClick={() => navigate("/second")}
-        // Position: bottom-[10%] right-[22%]
         className="absolute bottom-[10%] right-[24%] transition-transform hover:scale-110 active:scale-95"
       >
         <img
           src={startButton}
           alt="Start"
-          className="w-44 h-auto sm:w-52 md:w-60 object-contain"
+          draggable="false"
+          className="w-44 h-auto sm:w-52 md:w-60 object-contain select-none"
         />
       </button>
     </div>
