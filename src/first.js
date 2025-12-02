@@ -7,28 +7,12 @@ const First = () => {
   const navigate = useNavigate();
 
   return (
-    <div
-      className="
-        fixed inset-0 w-screen h-screen
-        overflow-hidden
-        select-none
-        touch-action-none
-      "
-      style={{ overscrollBehavior: "none" }}
-      onTouchMove={(e) => e.preventDefault()}
-      onScroll={(e) => e.preventDefault()}
-    >
-      {/* Fullscreen image - drag disabled */}
+    <div className="relative inset-0 w-screen h-screen overflow-auto">
+      {/* Background image - dragging allowed */}
       <img
         src={mainImage}
         alt="Main"
-        draggable="false"
-        className="
-          absolute inset-0 w-full h-full
-          object-fill
-          pointer-events-none
-          select-none
-        "
+        className="absolute inset-0 w-full h-full object-fill"
       />
 
       {/* Start button */}
@@ -39,8 +23,7 @@ const First = () => {
         <img
           src={startButton}
           alt="Start"
-          draggable="false"
-          className="w-44 h-auto sm:w-52 md:w-60 object-contain select-none"
+          className="w-44 h-auto sm:w-52 md:w-60 object-contain"
         />
       </button>
     </div>
