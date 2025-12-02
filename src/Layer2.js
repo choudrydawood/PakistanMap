@@ -46,7 +46,7 @@ import popupSound from "./assets/popup33.mp3";
 import starSoundFile from "./assets/starSound.mp3";
 
 // ⭐ Continuous background music
-import balSong from "./assets/balsong.mov";
+import balSong from "./assets/balsong.mp3";
 
 import star1 from "./assets/l2star1.png";
 import star2 from "./assets/l2star2.png";
@@ -54,18 +54,17 @@ import star3 from "./assets/l2star3.png";
 import star4 from "./assets/l2star4.png";
 import star5 from "./assets/l2star5.png";
 import star6 from "./assets/l2star6.png";
-
+import star7 from "./assets/star6.png"
 import "./App.css";
 
 
 // ---------- GLOBAL AUDIO INSTANCE ----------
 let layer2Audio = null;
-
 function getLayer2Audio(song) {
   if (!layer2Audio) {
     layer2Audio = new Audio(song);
     layer2Audio.loop = true;
-    layer2Audio.volume = 0.3;
+    layer2Audio.volume = 0.26;
   }
   return layer2Audio;
 }
@@ -103,12 +102,10 @@ const Confetti = () => {
 };
 
 
-
 // -------------------- MAIN COMPONENT --------------------
 function Layer2() {
   const navigate = useNavigate();
 
-  // ---------- STATES ----------
   const [activeButton, setActiveButton] = useState(null);
   const [visited, setVisited] = useState([]);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -119,6 +116,8 @@ function Layer2() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [activeStar, setActiveStar] = useState(null);
   const [activeDyk, setActiveDyk] = useState(null);
+  const [blurBackground, setBlurBackground] = useState(false);
+
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight
@@ -126,30 +125,23 @@ function Layer2() {
 
   const mapRef = useRef(null);
 
-  // Sounds
   const popupCardAudioRef = useRef(new Audio(popupSound));
   const starAudioRef = useRef(new Audio(starSoundFile));
   const dykAudioRef = useRef(new Audio(starSoundFile));
 
-  // Background music
   const layer2MusicRef = useRef(getLayer2Audio(balSong));
 
   useEffect(() => {
     const audio = layer2MusicRef.current;
-
     const unlock = () => {
       audio.play().catch(() => {});
       window.removeEventListener("click", unlock);
       window.removeEventListener("touchstart", unlock);
     };
-
     audio.play().catch(() => {});
     window.addEventListener("click", unlock);
     window.addEventListener("touchstart", unlock);
-
-    return () => {
-      audio.pause();
-    };
+    return () => audio.pause();
   }, []);
 
   // ---------- BUTTON DATA ----------
@@ -172,7 +164,7 @@ function Layer2() {
     { id: 15, x: 0.55, y: 0.40, logo: punjab, logoGray: punjabG, popup: pun3, region: "punjab" },
     { id: 16, x: 0.51, y: 0.53, logo: punjab, logoGray: punjabG, popup: pun4, region: "punjab" },
 
-    // KPK + GB
+    // KPK + GLG
     { id: 19, x: 0.55, y: 0.17, logo: kpk, logoGray: kpkG, popup: pk5, region: "kpk" },
     { id: 20, x: 0.65, y: 0.07, logo: glg, logoGray: glgG, popup: pk2, region: "glg" },
     { id: 21, x: 0.61, y: 0.18, logo: kpk, logoGray: kpkG, popup: pk3, region: "kpk" },
@@ -181,20 +173,21 @@ function Layer2() {
   ];
 
   const starAssignments = {
-    2: star1,
-    7: star2,
-    14: star3,
-    19: star4,
-    21: star5,
-    3: star6
+    2: star7,
+    16: star2,
+    19: star5,
+    3: star4,
+    21: star3,
+    13: star6,
+    23: star1
   };
 
   const dykAssignments = {
     1: sindhdyk,
     6: baldyk,
-    13: pundyk,
+    14: pundyk,
     20: kpkdyk,
-    23: glgdyk,
+    22: glgdyk,
     9: randyk
   };
 
@@ -231,13 +224,18 @@ function Layer2() {
     if (dykAssignments[id]) {
       dykAudioRef.current.play();
       setActiveDyk(id);
-      setTimeout(() => setActiveDyk(null), 5000);
+      setBlurBackground(true);
+
+      setTimeout(() => {
+        setActiveDyk(null);
+        setBlurBackground(false);
+      }, 7000);
     }
 
     setActiveButton(null);
   };
 
-  // ---------- DRAGGING ----------
+  // ---------- DRAG FUNCTION ----------
   const startDrag = (x, y) => {
     setIsDragging(true);
     setLastPos({ x, y });
@@ -246,10 +244,7 @@ function Layer2() {
 
   const moveDrag = (x, y) => {
     if (!isDragging) return;
-    setPosition((p) => ({
-      x: p.x + (x - lastPos.x),
-      y: p.y + (y - lastPos.y)
-    }));
+    setPosition((p) => ({ x: p.x + (x - lastPos.x), y: p.y + (y - lastPos.y) }));
     setLastPos({ x, y });
   };
 
@@ -281,7 +276,7 @@ function Layer2() {
     return () => clearTimeout(timer);
   }, [windowSize]);
 
-  // ---------- RESIZE LISTENER ----------
+  // RESIZE LISTENER
   useEffect(() => {
     const onResize = () =>
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
@@ -289,19 +284,18 @@ function Layer2() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // ---------- FINAL COMPLETION → Next screen ----------
+  // COMPLETED ALL → GOTO NEXT
   useEffect(() => {
     if (visited.length === buttons.length) {
       setShowConfetti(true);
       setTimeout(() => navigate("/SecondLast"), 2000);
     }
-  }, [visited, navigate, buttons.length]);
+  }, [visited, navigate]);
 
   const logoSize = windowSize.width < 600 ? "28vmin" : "18vmin";
 
-
   // ----------------------------------------------------------
-  // ----------------------- RETURN ---------------------------
+  // RETURN
   // ----------------------------------------------------------
 
   return (
@@ -316,7 +310,7 @@ function Layer2() {
       {showConfetti && <Confetti />}
 
 
-      {/* ⭐⭐⭐ SKIP TO LAYER 3 BUTTON ⭐⭐⭐ */}
+      {/* SKIP BUTTON */}
       <button
         onClick={() => navigate("/SecondLast")}
         className="
@@ -330,9 +324,7 @@ function Layer2() {
           px-5 py-3 
           shadow-xl 
           flex items-center gap-2
-          hover:bg-white 
-          hover:scale-110 
-          active:scale-95
+          hover:bg-white hover:scale-110 active:scale-95
           transition-transform transition-colors
         "
       >
@@ -343,122 +335,139 @@ function Layer2() {
 
 
 
-
-      {/* MAP + ICONS */}
+      {/* BLUR LAYER - Only background & map gets blurred */}
       <div
-        ref={mapRef}
-        className="transition-transform duration-[1000ms] ease-in-out relative flex items-center justify-center"
-        onMouseDown={(e) => startDrag(e.clientX, e.clientY)}
-        onTouchStart={(e) => startDrag(e.touches[0].clientX, e.touches[0].clientY)}
-        style={{
-          cursor: "grab",
-          transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-          transformOrigin: "center center",
-          width: "100vw",
-          height: "100vh"
-        }}
+        className={`
+          absolute inset-0 transition-all duration-500
+          ${blurBackground ? "blur-md brightness-[0.5]" : ""}
+        `}
+        style={{ zIndex: 1 }}
       >
+
+
+        {/* MAP + ICONS */}
         <div
-          className="relative"
+          ref={mapRef}
+          className="transition-transform duration-[1000ms] ease-in-out relative flex items-center justify-center"
+          onMouseDown={(e) => startDrag(e.clientX, e.clientY)}
+          onTouchStart={(e) => startDrag(e.touches[0].clientX, e.touches[0].clientY)}
           style={{
-            width: "min(100vw,177.78vh)",
-            height: "min(56.25vw,100vh)"
+            cursor: "grab",
+            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+            transformOrigin: "center center",
+            width: "100vw",
+            height: "100vh"
           }}
         >
-          <img
-            src={mapImage}
-            alt="Pakistan Map"
-            className="select-none object-contain w-full h-full"
-            draggable={false}
-          />
+          <div
+            className="relative"
+            style={{
+              width: "min(100vw,177.78vh)",
+              height: "min(56.25vw,100vh)"
+            }}
+          >
+            <img
+              src={mapImage}
+              alt="Pakistan Map"
+              className="select-none object-contain w-full h-full"
+              draggable={false}
+            />
 
-          {isExploring &&
-            buttons.map((btn) => {
-              const isActive = activeButton === btn.id;
-              const isVisited = visited.includes(btn.id);
+            {isExploring &&
+              buttons.map((btn) => {
+                const isActive = activeButton === btn.id;
+                const isVisited = visited.includes(btn.id);
 
-              const size = isVisited
-                ? windowSize.width < 600
-                  ? "24vmin"
-                  : "14vmin"
-                : logoSize;
+                const size = isVisited
+                  ? windowSize.width < 600
+                    ? "24vmin"
+                    : "14vmin"
+                  : logoSize;
 
-              return (
-                <div
-                  key={btn.id}
-                  className="absolute"
-                  style={{
-                    top: `${btn.y * 100}%`,
-                    left: `${btn.x * 100}%`,
-                    transform: `translate(-50%,-50%) scale(${1.5 / scale})`
-                  }}
-                >
-                  {/* POPUP CARD */}
-                  {isActive ? (
-                    <div className="relative inline-block">
-                      <img
-                        src={btn.popup}
-                        alt="popup"
-                        className="block max-w-[70vmin] max-h-[70vmin]"
-                        draggable={false}
-                      />
-                      <button
-                        onClick={handleClose}
-                        className="absolute -top-3 -right-3 bg-red-600 text-white w-7 h-7 rounded-full hover:bg-red-700"
+                return (
+                  <div
+                    key={btn.id}
+                    className="absolute"
+                    style={{
+                      top: `${btn.y * 100}%`,
+                      left: `${btn.x * 100}%`,
+                      transform: `translate(-50%,-50%) scale(${1.5 / scale})`
+                    }}
+                  >
+                    {/* POPUP CARD */}
+                    {isActive ? (
+                      <div className="relative inline-block">
+                        <img
+                          src={btn.popup}
+                          alt="popup"
+                          className="block max-w-[70vmin] max-h-[70vmin]"
+                          draggable={false}
+                        />
+                        <button
+                          onClick={handleClose}
+                          className="absolute -top-3 -right-3 bg-red-600 text-white w-7 h-7 rounded-full hover:bg-red-700"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => handleClick(btn.id)}
+                        className={`cursor-pointer transition-transform duration-300 hover:scale-110 ${
+                          !isVisited ? "hop-animation" : ""
+                        }`}
                       >
-                        ✕
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      onClick={() => handleClick(btn.id)}
-                      className={`cursor-pointer transition-transform duration-300 hover:scale-110 ${
-                        !isVisited ? "hop-animation" : ""
-                      }`}
-                    >
-                      <img
-                        src={isVisited ? btn.logo : btn.logoGray}
-                        style={{ width: size, height: size }}
-                        className="rounded-full object-contain shadow-xl"
-                        draggable={false}
-                      />
-                    </div>
-                  )}
+                        <img
+                          src={isVisited ? btn.logo : btn.logoGray}
+                          style={{ width: size, height: size }}
+                          className="rounded-full object-contain shadow-xl"
+                          draggable={false}
+                        />
+                      </div>
+                    )}
 
-                  {/* STAR POPUP */}
-                  {activeStar === btn.id && starAssignments[btn.id] && (
-                    <div
-                      className="absolute left-1/2 -translate-x-1/2"
-                      style={{ top: "-16vmin", transform: `scale(${28 / scale})` }}
-                    >
-                      <img
-                        src={starAssignments[btn.id]}
-                        className="animate-popStar"
-                        style={{ width: "300vmin", pointerEvents: "none" }}
-                        draggable={false}
-                      />
-                    </div>
-                  )}
+                    {/* STAR POPUP */}
+                    {activeStar === btn.id && starAssignments[btn.id] && (
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2"
+                        style={{ top: "-16vmin", transform: `scale(${28 / scale})` }}
+                      >
+                        <img
+                          src={starAssignments[btn.id]}
+                          className="animate-popStar"
+                          style={{ width: "300vmin", pointerEvents: "none" }}
+                          draggable={false}
+                        />
+                      </div>
+                    )}
 
-                  {/* DYK POPUP */}
-                  {activeDyk === btn.id && dykAssignments[btn.id] && (
-                    <div
-                      className="absolute left-1/2 -translate-x-1/2"
-                      style={{ top: "-18vmin", transform: `scale(${32 / scale})` }}
-                    >
-                      <img
-                        src={dykAssignments[btn.id]}
-                        className="animate-popStar"
-                        style={{ width: "400vmin", pointerEvents: "none" }}
-                        draggable={false}
-                      />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                    {/* DYK POPUP - Big and Crisp */}
+                    {activeDyk === btn.id && dykAssignments[btn.id] && (
+                      <></>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
         </div>
       </div>
+
+
+      {/* REAL DYK POPUP - OUTSIDE BLUR LAYER */}
+      {activeDyk && (
+        <div className="fixed inset-0 flex items-center justify-center z-[99999] pointer-events-none">
+          <img
+            src={dykAssignments[activeDyk]}
+            className="animate-popStar"
+            style={{
+              width: "70vmin",
+              pointerEvents: "none"
+            }}
+            draggable={false}
+          />
+        </div>
+      )}
+
     </div>
   );
 }

@@ -151,17 +151,17 @@ function Layer1() {
   }, []);
 
   const starAssignments = {
-    2: star1,
-    4: star2,
+    2: star9,
+    4: star1,
     7: star3,
-    9: star4,
+    8: star4,
     13: star5,
     16: star6,
-    17: star7,
+    17: star11,
     19: star8,
-    21: star9,
-    22: star10,
-    11: star11
+    21: star2,
+    18: star7,
+    11: star10
   };
 
   const buttons = [
