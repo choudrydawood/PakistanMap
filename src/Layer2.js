@@ -64,7 +64,7 @@ function getLayer2Audio(song) {
   if (!layer2Audio) {
     layer2Audio = new Audio(song);
     layer2Audio.loop = true;
-    layer2Audio.volume = 0.26;
+    layer2Audio.volume = 0.16;
   }
   return layer2Audio;
 }

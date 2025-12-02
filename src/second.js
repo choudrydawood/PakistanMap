@@ -35,7 +35,7 @@ const Second = () => {
       <button
   onClick={() => navigate("/third")}
   className="
-    absolute bottom-[22%] left-1/2
+    absolute bottom-[25%] left-1/2
     transform -translate-x-[60%]
     transition-transform
     hover:scale-110 active:scale-95

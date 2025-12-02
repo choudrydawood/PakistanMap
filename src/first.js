@@ -34,7 +34,7 @@ const First = () => {
       {/* Start button */}
       <button
         onClick={() => navigate("/second")}
-        className="absolute bottom-[10%] right-[24%] transition-transform hover:scale-110 active:scale-95"
+        className="absolute bottom-[15%] right-[24%] transition-transform hover:scale-110 active:scale-95"
       >
         <img
           src={startButton}
