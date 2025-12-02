@@ -20,7 +20,7 @@ const SecondLast = () => {
 
       <button
         onClick={handleNext}
-        className="absolute left-1/2 bottom-[19%] transform -translate-x-1/2 hover:scale-110 transition-transform duration-300"
+        className="absolute left-1/2 bottom-[15%] transform -translate-x-1/2 hover:scale-110 transition-transform duration-300"
       >
         <img
           src={buttonImage}
